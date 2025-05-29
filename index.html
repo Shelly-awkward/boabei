@@ -30,15 +30,14 @@
   <!-- 動畫起始圖 -->
   <img id="cat" src="1.JPG" alt="貓咪擲筊動畫">
 
-  <!-- 懸疑音效檔案，請放置於同一資料夾 -->
+  <!-- 懸疑音效檔案 -->
   <audio id="sfx" src="suspense.mp3" preload></audio>
 
   <script>
     const cat = document.getElementById('cat');
     const sfx = document.getElementById('sfx');
-    // 先載入音效，確保可以播放
     sfx.load();
-    sfx.volume = 0.8;  // 音量調整
+    sfx.volume = 0.8;
 
     const frames = ['1.JPG','2.JPG','3.JPG','4.PNG','5.JPG','6.JPG','7.JPG'];
     const results = [
@@ -47,9 +46,9 @@
       { file: '8-2.JPG', weight: 0.25 }
     ];
     // 各幀停留時間 (ms)
-    const durations = [200,200,200,200,200,400,800];
+    // 前5張200ms，第6張400ms，第7張3000ms (3秒)
+    const durations = [200,200,200,200,200,400,3000];
 
-    // 預先載入圖片
     frames.concat(results.map(r => r.file)).forEach(src => {
       const img = new Image(); img.src = src;
     });
@@ -66,7 +65,6 @@
     function playFrames(idx = 0) {
       if (idx < frames.length) {
         cat.src = frames[idx];
-        // 第七張圖 (idx==6) 時播放音效
         if (idx === 6) {
           sfx.currentTime = 0;
           sfx.play().catch(err => console.warn('Audio play failed:', err));
@@ -81,7 +79,6 @@
     }
 
     cat.addEventListener('click', () => {
-      // 重新載入音效檔，確保同一 click 中可以播放
       sfx.load();
       playFrames(0);
     });
