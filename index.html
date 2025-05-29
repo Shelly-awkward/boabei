@@ -1,114 +1,147 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>貓咪擲筊 Canvas 版</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>貓咪擲筊 - 全畫面互動版</title>
   <style>
-    body {
+    html, body {
       margin: 0;
-      background: linear-gradient(to bottom, #ffe9ec, #fff);
-      font-family: "Microsoft JhengHei", sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
+      padding: 0;
       overflow: hidden;
+      height: 100%;
+      background: #ffeef2;
+      font-family: "Microsoft JhengHei", sans-serif;
     }
+
     canvas {
-      background: #fff0f4;
-      border: 2px solid #d88;
-      border-radius: 10px;
+      display: block;
     }
-    button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      font-size: 20px;
+
+    #bubble {
+      position: absolute;
+      top: 8%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #fff;
+      border: 2px solid #d88;
+      border-radius: 20px;
+      padding: 15px 25px;
+      font-size: 22px;
+      color: #d44;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      display: none;
+      z-index: 10;
+    }
+
+    #throwBtn {
+      position: absolute;
+      bottom: 5%;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 15px 25px;
+      font-size: 22px;
       background: #e44;
       color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 8px;
+      z-index: 10;
     }
   </style>
 </head>
 <body>
-  <canvas id="boabeiCanvas" width="300" height="400"></canvas>
-  <button onclick="throwBoabei()">擲筊！</button>
+  <canvas id="boabeiCanvas"></canvas>
+  <div id="bubble">結果</div>
+  <button id="throwBtn" onclick="throwBoabei()">擲筊！</button>
 
   <script>
     const canvas = document.getElementById("boabeiCanvas");
     const ctx = canvas.getContext("2d");
+    const bubble = document.getElementById("bubble");
+
+    const bg = new Image();
+    bg.src = "https://raw.githubusercontent.com/Shelly-awkward/boabei/main/assets/boabei_cat_bg.png"; // 網路圖片：貓咪背景
+
+    let W = window.innerWidth;
+    let H = window.innerHeight;
+    canvas.width = W;
+    canvas.height = H;
 
     let angle1 = 0, angle2 = 0;
-    let y1 = 300, y2 = 300;
+    let y1 = H * 0.7, y2 = H * 0.7;
     let isAnimating = false;
+    let bo1Face = true, bo2Face = true;
     let resultText = "";
 
     function drawBoabei(x, y, angle, isFaceUp) {
       ctx.save();
       ctx.translate(x, y);
       ctx.rotate(angle);
-
       ctx.beginPath();
-      ctx.fillStyle = isFaceUp ? "#f88" : "#aaa";
-      ctx.ellipse(0, 0, 40, 20, 0, 0, Math.PI * 2);
+      ctx.fillStyle = isFaceUp ? "#d44" : "#aaa";
+      ctx.ellipse(0, 0, 40, isFaceUp ? 20 : 8, 0, 0, Math.PI * 2);
       ctx.fill();
-
       ctx.beginPath();
-      ctx.strokeStyle = "#400";
-      ctx.arc(0, 0, 20, 0, Math.PI, isFaceUp);
+      ctx.strokeStyle = isFaceUp ? "#fff" : "#666";
+      ctx.lineWidth = 2;
+      ctx.ellipse(0, 0, 20, isFaceUp ? 10 : 4, 0, 0, Math.PI * 2);
       ctx.stroke();
-
       ctx.restore();
     }
 
     function drawScene() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawBoabei(90, y1, angle1, bo1Face);
-      drawBoabei(210, y2, angle2, bo2Face);
+      ctx.clearRect(0, 0, W, H);
+      if (bg.complete) ctx.drawImage(bg, W/2 - 150, 30, 300, 300);
+      drawBoabei(W * 0.35, y1, angle1, bo1Face);
+      drawBoabei(W * 0.65, y2, angle2, bo2Face);
     }
-
-    let bo1Face = true, bo2Face = true;
 
     function throwBoabei() {
       if (isAnimating) return;
       isAnimating = true;
+      bubble.style.display = "none";
 
-      const r = Math.floor(Math.random() * 3);
       const outcomes = [
-        [true, true, "聖筊"],
-        [true, false, "笑筊"],
-        [false, false, "無筊"]
+        [true, true, "喵～這是聖筊喔！😺"],
+        [true, false, "喵～這是笑筊呢～😽"],
+        [false, false, "喵～是無筊唷！🙀"]
       ];
+      const r = Math.floor(Math.random() * outcomes.length);
       [bo1Face, bo2Face, resultText] = outcomes[r];
 
       let frame = 0;
-      let audio = new Audio("https://cdn.pixabay.com/audio/2022/03/16/audio_5dbed7f7f7.mp3");
-      audio.play();
+      const sound = new Audio("https://cdn.pixabay.com/download/audio/2022/03/07/audio_6369291d96.mp3?filename=magic-wand-13496.mp3");
+      sound.play();
       if (navigator.vibrate) navigator.vibrate(200);
 
       function animate() {
         frame++;
         angle1 += 0.3;
         angle2 -= 0.3;
-        y1 = 300 - Math.abs(Math.sin(frame / 10) * 150);
-        y2 = 300 - Math.abs(Math.cos(frame / 10) * 150);
-
+        y1 = H * 0.7 - Math.abs(Math.sin(frame / 10) * H * 0.3);
+        y2 = H * 0.7 - Math.abs(Math.cos(frame / 10) * H * 0.3);
         drawScene();
-
         if (frame < 60) {
           requestAnimationFrame(animate);
         } else {
           isAnimating = false;
-          setTimeout(() => alert(resultText), 100);
+          bubble.textContent = resultText;
+          bubble.style.display = "block";
         }
       }
 
       animate();
     }
 
-    drawScene();
+    window.addEventListener("resize", () => {
+      W = window.innerWidth;
+      H = window.innerHeight;
+      canvas.width = W;
+      canvas.height = H;
+      drawScene();
+    });
+
+    bg.onload = drawScene;
   </script>
 </body>
 </html>
