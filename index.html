@@ -3,151 +3,124 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>擲筊模擬器</title>
+  <title>3D 擲筊模擬器</title>
   <style>
-    body {
-      font-family: Arial, "Microsoft JhengHei", sans-serif;
-      background: #f5f5f5;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-    }
-
-    h1 {
-      margin-top: 40px;
-    }
-
-    .blocks-container {
-      position: relative;
-      width: 300px;
-      height: 200px;
-      background: #e0e0e0;
-      border-radius: 15px;
-      margin: 20px;
-      overflow: hidden;
-    }
-
-    .block {
+    body { margin: 0; overflow: hidden; background: #111; }
+    canvas { display: block; }
+    #info {
       position: absolute;
-      width: 120px;
-      height: auto;
-      transition: none;
+      top: 20px;
+      left: 20px;
+      color: #fff;
+      font-family: sans-serif;
+      z-index: 10;
     }
-
-    .throwing {
-      animation: throw 1s ease-in-out;
-    }
-
-    @keyframes throw {
-      0% { transform: translateY(-150px) rotate(0deg); }
-      60% { transform: translateY(0) rotate(360deg); }
-      100% { transform: translateY(0) rotate(405deg); }
-    }
-
     button {
-      padding: 15px 30px;
-      font-size: 20px;
-      background-color: #b22222;
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 20px;
+      font-size: 18px;
+      background: #b22222;
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       cursor: pointer;
-      margin: 20px;
-      transition: background-color 0.3s;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-
-    button:hover {
-      background-color: #800000;
-    }
-
-    #result {
-      font-size: 24px;
-      margin: 20px;
-      padding: 15px 30px;
-      border-radius: 8px;
-      font-weight: bold;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .counting {
-      font-size: 16px;
-      color: #666;
-      margin-bottom: 40px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
     }
   </style>
 </head>
 <body>
-  <h1>擲筊模擬器</h1>
-  <div class="blocks-container">
-    <img class="block" id="block1" style="left: 40px; top: 70px;" alt="筊杯1" />
-    <img class="block" id="block2" style="left: 140px; top: 70px;" alt="筊杯2" />
-  </div>
-  <button onclick="throwBlocks()">擲筊</button>
-  <div id="result"></div>
-  <div id="counting" class="counting"></div>
+  <div id="info">3D 擲筊模擬器</div>
+  <button onclick="throwCups()">擲筊</button>
+  <script type="module">
+    import * as THREE from 'https://cdn.skypack.dev/three@0.150.1';
+    import { OrbitControls } from 'https://cdn.skypack.dev/three/examples/jsm/controls/OrbitControls';
 
-  <script>
-    const block1 = document.getElementById('block1');
-    const block2 = document.getElementById('block2');
-    const result = document.getElementById('result');
-    const counting = document.getElementById('counting');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color('#111');
 
-    // 筊杯陰（有字）和陽（翻面）圖
-    const yin = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZ0AAAE6CAYAAADNxo/0AAEAAElEQVR4nOz9Z3clSZKmCT6ianYvAC...";
-    const yang = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZ0AAAE6CAYAAADNxo/0AAEAAElEQVR4nOz9Z3clSZKmCT6ianYvAC...";
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 5, 10);
 
-    // 統計
-    let stats = { total: 0, sheng: 0, xiao: 0, gai: 0 };
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
 
-    function throwBlocks() {
-      block1.classList.remove('throwing');
-      block2.classList.remove('throwing');
-      void block1.offsetWidth;
-      void block2.offsetWidth;
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
 
-      block1.classList.add('throwing');
-      block2.classList.add('throwing');
-      document.querySelector('button').disabled = true;
+    // 光源
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(5, 10, 7.5);
+    scene.add(directionalLight);
 
-      // ✅ 手機震動
-      navigator.vibrate?.(200);
+    // 筊杯模型
+    const cups = [];
+    const cupGeometry = new THREE.SphereGeometry(1, 32, 32, 0, Math.PI, 0, Math.PI/1.5);
+    const cupMaterial1 = new THREE.MeshStandardMaterial({ color: 0xdd3333 });
+    const cupMaterial2 = new THREE.MeshStandardMaterial({ color: 0xdd3333 });
+    const cup1 = new THREE.Mesh(cupGeometry, cupMaterial1);
+    const cup2 = new THREE.Mesh(cupGeometry, cupMaterial2);
+    cup1.rotation.x = Math.PI / 2;
+    cup2.rotation.x = Math.PI / 2;
+    cup1.position.x = -2;
+    cup2.position.x = 2;
+    scene.add(cup1);
+    scene.add(cup2);
+    cups.push(cup1, cup2);
 
-      setTimeout(() => {
-        const face1 = Math.random() < 0.5;
-        const face2 = Math.random() < 0.5;
+    // 地面
+    const ground = new THREE.Mesh(
+      new THREE.PlaneGeometry(20, 20),
+      new THREE.MeshStandardMaterial({ color: 0x333333 })
+    );
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.y = -1.1;
+    scene.add(ground);
 
-        block1.src = face1 ? yin : yang;
-        block2.src = face2 ? yin : yang;
+    // 擲筊動畫
+    function throwCups() {
+      cups.forEach((cup, i) => {
+        const targetRot = new THREE.Vector3(
+          Math.random() * 6,
+          Math.random() * 6,
+          Math.random() * 6
+        );
+        const start = Date.now();
+        const duration = 1000;
 
-        stats.total++;
-
-        if (face1 !== face2) {
-          result.textContent = '聖筊：神明同意！';
-          result.style.backgroundColor = '#98FB98';
-          stats.sheng++;
-        } else if (face1 && face2) {
-          result.textContent = '蓋筊：神明不同意。';
-          result.style.backgroundColor = '#D3D3D3';
-          stats.gai++;
-        } else {
-          result.textContent = '笑筊：請重新問過！';
-          result.style.backgroundColor = '#FFB6C1';
-          stats.xiao++;
+        function animate() {
+          const t = (Date.now() - start) / duration;
+          if (t < 1) {
+            cup.rotation.x = targetRot.x * t;
+            cup.rotation.y = targetRot.y * t;
+            cup.rotation.z = targetRot.z * t;
+            requestAnimationFrame(animate);
+          }
         }
+        animate();
+      });
 
-        counting.textContent = `擲筊次數：${stats.total} ｜ 聖筊：${stats.sheng} ｜ 笑筊：${stats.xiao} ｜ 蓋筊：${stats.gai}`;
-
-        document.querySelector('button').disabled = false;
-      }, 1000);
+      navigator.vibrate?.(200);
     }
 
-    // 預設圖片
-    block1.src = yang;
-    block2.src = yang;
+    // 主要動畫迴圈
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
   </script>
 </body>
 </html>
