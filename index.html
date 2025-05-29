@@ -33,6 +33,15 @@
 </head>
 <body>
   <img id="cat" src="1.JPG" alt="貓咪擲筊動畫" />
-  <!-- ... 其餘 JS 不變 ... -->
-</body>
-</html>
+
+  <script>
+    const cat = document.getElementById('cat');
+
+    // 動作幀：1→2→…→7
+    const frames = ['1.JPG','2.JPG','3.JPG','4.PNG','5.JPG','6.JPG','7.JPG'];
+
+    // 結果圖與機率：聖杯 50%，笑杯 25%，蓋杯 25%
+    const results = [
+      { file: '8-3.JPG', weight: 0.5 },
+      { file: '8-1.JPG', weight: 0.25 },
+      {
