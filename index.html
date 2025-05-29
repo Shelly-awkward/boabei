@@ -6,23 +6,18 @@
   <title>貓咪擲筊動畫</title>
   <style>
     html, body {
-      margin: 0;
-      padding: 0;
-      width: 100vw;
-      height: 100vh;
+      margin: 0; padding: 0;
+      width: 100vw; height: 100vh;
     }
     body {
       background: #fff8f0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      display: flex; justify-content: center; align-items: center;
       font-family: sans-serif;
     }
     #cat {
       max-width: 90vw;
       max-height: 90vh;
-      width: auto;
-      height: auto;
+      width: auto; height: auto;
       cursor: pointer;
       transition: transform 0.1s ease;
     }
@@ -32,23 +27,20 @@
   </style>
 </head>
 <body>
-  <!-- 動畫起始圖 -->
-  <img id="cat" src="1.JPG" alt="貓咪擲筊動畫" />
+  <img id="cat" src="1.JPG" alt="貓咪擲筊動畫">
 
   <script>
     const cat = document.getElementById('cat');
-
-    // 1→2→…→7 張動作圖
     const frames = ['1.JPG','2.JPG','3.JPG','4.PNG','5.JPG','6.JPG','7.JPG'];
-
-    // 三種結果圖與機率：聖杯 50%、笑杯 25%、蓋杯 25%
     const results = [
       { file: '8-3.JPG', weight: 0.5 },
       { file: '8-1.JPG', weight: 0.25 },
       { file: '8-2.JPG', weight: 0.25 }
     ];
+    // 各幀停留時間 (ms)，前 5 張 200ms，第 6、7 張 800ms
+    const durations = [200,200,200,200,200,400,400];
 
-    // 預先載入所有圖片到快取
+    // 預先載入所有圖
     frames.concat(results.map(r => r.file)).forEach(src => {
       const img = new Image();
       img.src = src;
@@ -63,20 +55,19 @@
       return results[results.length - 1].file;
     }
 
-    cat.addEventListener('click', () => {
-      let i = 0;
-      const timer = setInterval(() => {
-        if (i < frames.length) {
-          cat.src = frames[i++];
-        } else {
-          clearInterval(timer);
-          setTimeout(() => {
-            cat.src = getResult();
-            if (navigator.vibrate) navigator.vibrate(200);
-          }, 200);
-        }
-      }, 200);
-    });
+    function playFrames(idx = 0) {
+      if (idx < frames.length) {
+        cat.src = frames[idx];
+        setTimeout(() => playFrames(idx + 1), durations[idx]);
+      } else {
+        setTimeout(() => {
+          cat.src = getResult();
+          if (navigator.vibrate) navigator.vibrate(200);
+        }, 200);
+      }
+    }
+
+    cat.addEventListener('click', () => playFrames(0));
   </script>
 </body>
 </html>
