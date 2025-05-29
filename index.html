@@ -3,145 +3,60 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>貓咪擲筊 - 全畫面互動版</title>
+  <title>貓咪擲筊動畫</title>
   <style>
-    html, body {
+    body {
+      background: #fff8f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
       margin: 0;
-      padding: 0;
-      overflow: hidden;
-      height: 100%;
-      background: #ffeef2;
-      font-family: "Microsoft JhengHei", sans-serif;
+      font-family: sans-serif;
     }
-
-    canvas {
-      display: block;
+    #cat {
+      width: 80vw;
+      max-width: 600px;
+      cursor: pointer;
+      transition: transform 0.2s ease;
     }
-
-    #bubble {
-      position: absolute;
-      top: 8%;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #fff;
-      border: 2px solid #d88;
-      border-radius: 20px;
-      padding: 15px 25px;
-      font-size: 22px;
-      color: #d44;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-      display: none;
-      z-index: 10;
-    }
-
-    #throwBtn {
-      position: absolute;
-      bottom: 5%;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 15px 25px;
-      font-size: 22px;
-      background: #e44;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      z-index: 10;
+    #cat:active {
+      transform: scale(0.97);
     }
   </style>
 </head>
 <body>
-  <canvas id="boabeiCanvas"></canvas>
-  <div id="bubble">結果</div>
-  <button id="throwBtn" onclick="throwBoabei()">擲筊！</button>
+
+  <img id="cat" src="1.PNG" alt="貓咪擲筊動畫" />
 
   <script>
-    const canvas = document.getElementById("boabeiCanvas");
-    const ctx = canvas.getContext("2d");
-    const bubble = document.getElementById("bubble");
+    const cat = document.getElementById('cat');
+    const frames = ['1.PNG', '2.jpg', '3.jpg'];
+    const results = ['4-1.JPG', '4-2.JPG', '4-3.JPG']; // 聖、蓋、笑
 
-    const bg = new Image();
-    bg.src = "https://raw.githubusercontent.com/Shelly-awkward/boabei/main/assets/boabei_cat_bg.png"; // 網路圖片：貓咪背景
-
-    let W = window.innerWidth;
-    let H = window.innerHeight;
-    canvas.width = W;
-    canvas.height = H;
-
-    let angle1 = 0, angle2 = 0;
-    let y1 = H * 0.7, y2 = H * 0.7;
-    let isAnimating = false;
-    let bo1Face = true, bo2Face = true;
-    let resultText = "";
-
-    function drawBoabei(x, y, angle, isFaceUp) {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.rotate(angle);
-      ctx.beginPath();
-      ctx.fillStyle = isFaceUp ? "#d44" : "#aaa";
-      ctx.ellipse(0, 0, 40, isFaceUp ? 20 : 8, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.strokeStyle = isFaceUp ? "#fff" : "#666";
-      ctx.lineWidth = 2;
-      ctx.ellipse(0, 0, 20, isFaceUp ? 10 : 4, 0, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.restore();
+    function getResult() {
+      const r = Math.random();
+      if (r < 0.5) return results[0];      // 聖筊
+      else if (r < 0.75) return results[1]; // 蓋筊
+      else return results[2];              // 笑筊
     }
 
-    function drawScene() {
-      ctx.clearRect(0, 0, W, H);
-      if (bg.complete) ctx.drawImage(bg, W/2 - 150, 30, 300, 300);
-      drawBoabei(W * 0.35, y1, angle1, bo1Face);
-      drawBoabei(W * 0.65, y2, angle2, bo2Face);
-    }
-
-    function throwBoabei() {
-      if (isAnimating) return;
-      isAnimating = true;
-      bubble.style.display = "none";
-
-      const outcomes = [
-        [true, true, "喵～這是聖筊喔！😺"],
-        [true, false, "喵～這是笑筊呢～😽"],
-        [false, false, "喵～是無筊唷！🙀"]
-      ];
-      const r = Math.floor(Math.random() * outcomes.length);
-      [bo1Face, bo2Face, resultText] = outcomes[r];
-
-      let frame = 0;
-      const sound = new Audio("https://cdn.pixabay.com/download/audio/2022/03/07/audio_6369291d96.mp3?filename=magic-wand-13496.mp3");
-      sound.play();
-      if (navigator.vibrate) navigator.vibrate(200);
-
-      function animate() {
-        frame++;
-        angle1 += 0.3;
-        angle2 -= 0.3;
-        y1 = H * 0.7 - Math.abs(Math.sin(frame / 10) * H * 0.3);
-        y2 = H * 0.7 - Math.abs(Math.cos(frame / 10) * H * 0.3);
-        drawScene();
-        if (frame < 60) {
-          requestAnimationFrame(animate);
-        } else {
-          isAnimating = false;
-          bubble.textContent = resultText;
-          bubble.style.display = "block";
+    cat.addEventListener('click', () => {
+      let index = 0;
+      const interval = setInterval(() => {
+        cat.src = frames[index];
+        index++;
+        if (index >= frames.length) {
+          clearInterval(interval);
+          setTimeout(() => {
+            cat.src = getResult();
+            // 加入震動
+            if (navigator.vibrate) navigator.vibrate(200);
+          }, 200);
         }
-      }
-
-      animate();
-    }
-
-    window.addEventListener("resize", () => {
-      W = window.innerWidth;
-      H = window.innerHeight;
-      canvas.width = W;
-      canvas.height = H;
-      drawScene();
+      }, 300);
     });
-
-    bg.onload = drawScene;
   </script>
+
 </body>
 </html>
