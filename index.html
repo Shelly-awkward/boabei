@@ -27,23 +27,27 @@
   </style>
 </head>
 <body>
+  <!-- 動畫起始圖 -->
   <img id="cat" src="1.JPG" alt="貓咪擲筊動畫">
+
+  <!-- 懸疑音效檔案，請放置於同一資料夾 -->
+  <audio id="sfx" src="suspense.mp3" preload="auto"></audio>
 
   <script>
     const cat = document.getElementById('cat');
+    const sfx = document.getElementById('sfx');
     const frames = ['1.JPG','2.JPG','3.JPG','4.PNG','5.JPG','6.JPG','7.JPG'];
     const results = [
       { file: '8-3.JPG', weight: 0.5 },
       { file: '8-1.JPG', weight: 0.25 },
       { file: '8-2.JPG', weight: 0.25 }
     ];
-    // 各幀停留時間 (ms)，前 5 張 200ms，第 6、7 張 800ms
+    // 各幀停留時間 (ms)，前 5 張 200ms，第 6 張 400ms，第 7 張 800ms
     const durations = [200,200,200,200,200,400,1000];
 
     // 預先載入所有圖
     frames.concat(results.map(r => r.file)).forEach(src => {
-      const img = new Image();
-      img.src = src;
+      const img = new Image(); img.src = src;
     });
 
     function getResult() {
@@ -58,6 +62,11 @@
     function playFrames(idx = 0) {
       if (idx < frames.length) {
         cat.src = frames[idx];
+        // 在第 7 張圖 (idx = 6) 時播放懸疑音效
+        if (idx === 6) {
+          sfx.currentTime = 0;
+          sfx.play();
+        }
         setTimeout(() => playFrames(idx + 1), durations[idx]);
       } else {
         setTimeout(() => {
