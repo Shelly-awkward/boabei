@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>擲筊模擬器</title>
+  <style>
+    body {
+      font-family: Arial, "Microsoft JhengHei", sans-serif;
+      margin: 0;
+      background: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    h1 {
+      margin-top: 40px;
+    }
+
+    .blocks-container {
+      position: relative;
+      width: 300px;
+      height: 200px;
+      background: #e0e0e0;
+      border-radius: 15px;
+      margin: 20px;
+      overflow: hidden;
+    }
+
+    .block {
+      position: absolute;
+      width: 100px;
+      height: 50px;
+      transition: none;
+    }
+
+    .throwing {
+      animation: throw 1s cubic-bezier(0.36, 0, 0.66, 1);
+    }
+
+    @keyframes throw {
+      0% { transform: translateY(-150px) rotate(0deg); }
+      60% { transform: translateY(0) rotate(360deg); }
+      70% { transform: translateY(-30px) rotate(450deg); }
+      80% { transform: translateY(0) rotate(480deg); }
+      90% { transform: translateY(-10px) rotate(490deg); }
+      100% { transform: translateY(0) rotate(495deg); }
+    }
+
+    button {
+      padding: 15px 30px;
+      font-size: 20px;
+      background-color: #b22222;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 20px;
+      transition: background-color 0.3s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    button:hover {
+      background-color: #800000;
+    }
+
+    button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+
+    #result {
+      font-size: 24px;
+      margin: 20px;
+      padding: 15px 30px;
+      border-radius: 8px;
+      font-weight: bold;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .counting {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 40px;
+    }
+  </style>
+</head>
+<body>
+  <h1>擲筊模擬器</h1>
+  <div class="blocks-container">
+    <img class="block" id="block1" style="left: 50px; top: 75px;" alt="筊杯1" />
+    <img class="block" id="block2" style="left: 150px; top: 75px;" alt="筊杯2" />
+  </div>
+  <button onclick="throwBlocks()">擲筊</button>
+  <div id="result"></div>
+  <div id="counting" class="counting"></div>
+
+  <script>
+    const block1 = document.getElementById('block1');
+    const block2 = document.getElementById('block2');
+    const result = document.getElementById('result');
+    const counting = document.getElementById('counting');
+
+    const yin = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='50' viewBox='0 0 100 50'%3E%3Cpath d='M5,25 a45,25 0 1,0 90,0 a45,25 0 1,0 -90,0' fill='%23dc3545'/%3E%3Cpath d='M20,25 a30,15 0 1,0 60,0' fill='none' stroke='white' stroke-width='2'/%3E%3C/svg%3E";
+    const yang = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='50' viewBox='0 0 100 50'%3E%3Cpath d='M5,25 a45,25 0 1,0 90,0 a45,25 0 1,0 -90,0' fill='%23dc3545'/%3E%3C/svg%3E";
+
+    let stats = { total: 0, sheng: 0, xiao: 0, gai: 0 };
+
+    function throwBlocks() {
+      block1.classList.remove('throwing');
+      block2.classList.remove('throwing');
+      void block1.offsetWidth; // reflow
+      void block2.offsetWidth;
+
+      block1.classList.add('throwing');
+      block2.classList.add('throwing');
+      document.querySelector('button').disabled = true;
+
+      setTimeout(() => {
+        const face1 = Math.random() < 0.5;
+        const face2 = Math.random() < 0.5;
+
+        block1.src = face1 ? yin : yang;
+        block2.src = face2 ? yin : yang;
+
+        stats.total++;
+
+        if (face1 !== face2) {
+          result.textContent = '聖筊：神明同意！';
+          result.style.backgroundColor = '#98FB98';
+          stats.sheng++;
+        } else if (face1 && face2) {
+          result.textContent = '蓋筊：神明不同意。';
+          result.style.backgroundColor = '#D3D3D3';
+          stats.gai++;
+        } else {
+          result.textContent = '笑筊：請重新問過！';
+          result.style.backgroundColor = '#FFB6C1';
+          stats.xiao++;
+        }
+
+        counting.textContent =
+          `擲筊次數：${stats.total} ｜ 聖筊：${stats.sheng} ｜ 笑筊：${stats.xiao} ｜ 蓋筊：${stats.gai}`;
+
+        document.querySelector('button').disabled = false;
+      }, 1000);
+    }
+
+    // 預設圖片
+    block1.src = yang;
+    block2.src = yang;
+  </script>
+</body>
+</html>
