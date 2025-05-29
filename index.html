@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>貓咪擲筊動畫</title>
   <style>
     body {
@@ -31,14 +31,16 @@
 
   <script>
     const cat = document.getElementById('cat');
-    const frames = ['1.PNG', '2.JPG', '3.JPG'];
+    
+    // 預設畫面是 1.PNG（不需要重播）
+    const frames = ['2.JPG', '3.JPG'];
     const results = ['4-1.JPG', '4-2.JPG', '4-3.JPG']; // 聖、蓋、笑
 
     function getResult() {
       const r = Math.random();
-      if (r < 0.5) return results[0];      // 聖筊
-      else if (r < 0.75) return results[1]; // 蓋筊
-      else return results[2];              // 笑筊
+      if (r < 0.5) return results[0];       // 聖筊 50%
+      else if (r < 0.75) return results[1];  // 蓋筊 25%
+      else return results[2];               // 笑筊 25%
     }
 
     cat.addEventListener('click', () => {
@@ -50,9 +52,8 @@
           clearInterval(interval);
           setTimeout(() => {
             cat.src = getResult();
-            // 加入震動
             if (navigator.vibrate) navigator.vibrate(200);
-          }, 200);
+          }, 300);
         }
       }, 300);
     });
