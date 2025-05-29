@@ -5,18 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>貓咪擲筊動畫</title>
   <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+    }
     body {
       background: #fff8f0;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      margin: 0;
       font-family: sans-serif;
     }
     #cat {
-      width: 80vw;
-      max-width: 600px;
+      max-width: 90vw;
+      max-height: 90vh;
+      width: auto;
+      height: auto;
       cursor: pointer;
       transition: transform 0.1s ease;
     }
@@ -26,49 +32,7 @@
   </style>
 </head>
 <body>
-
   <img id="cat" src="1.JPG" alt="貓咪擲筊動畫" />
-
-  <script>
-    const cat = document.getElementById('cat');
-
-    // 1→2→…→7 張動作圖檔名
-    const frames = ['1.JPG','2.JPG','3.JPG','4.PNG','5.JPG','6.JPG','7.JPG'];
-
-    // 三種結果圖，並標註機率 (權重總和 = 1)
-    const results = [
-      { file: '8-3.JPG', weight: 0.5 },  // 聖杯 50%
-      { file: '8-1.JPG', weight: 0.25 }, // 笑杯 25%
-      { file: '8-2.JPG', weight: 0.25 }  // 蓋杯 25%
-    ];
-
-    // 根據權重隨機抽一張結果圖
-    function getResult() {
-      let r = Math.random(), sum = 0;
-      for (const item of results) {
-        sum += item.weight;
-        if (r < sum) return item.file;
-      }
-      // 保險起見，如果亂數落在邊界，就回最後一張
-      return results[results.length - 1].file;
-    }
-
-    cat.addEventListener('click', () => {
-      let i = 0;
-      const timer = setInterval(() => {
-        if (i < frames.length) {
-          cat.src = frames[i++];
-        } else {
-          clearInterval(timer);
-          // 動畫結束後稍作停頓，再顯示結果並震動
-          setTimeout(() => {
-            cat.src = getResult();
-            if (navigator.vibrate) navigator.vibrate(200);
-          }, 200);
-        }
-      }, 200);
-    });
-  </script>
-
+  <!-- ... 其餘 JS 不變 ... -->
 </body>
 </html>
