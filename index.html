@@ -33,46 +33,52 @@
   <script>
     const cat = document.getElementById('cat');
     const sfx = document.getElementById('sfx');
+    sfx.volume = 1.0;
 
+    // 📦 抽籤結果設定（蓋杯、笑杯、聖杯）
     const results = [
-      { file: '8-1.JPG', weight: 0.25 },
-      { file: '8-2.JPG', weight: 0.25 },
-      { file: '8-3.JPG', weight: 0.5 }
+      { file: '8-1.JPG', weight: 0.25 }, // 蓋杯
+      { file: '8-2.JPG', weight: 0.25 }, // 笑杯
+      { file: '8-3.JPG', weight: 0.5 }   // 聖杯
     ];
+
+    // 📸 預先載入圖片，加快載入速度
+    ['cat.gif', ...results.map(r => r.file)].forEach(src => {
+      const img = new Image(); img.src = src;
+    });
 
     let isPlaying = false;
 
+    // 🎲 更穩定的抽籤邏輯
     function getResult() {
-      const r = Math.random();
-      let sum = 0;
+      const total = results.reduce((sum, r) => sum + r.weight, 0);
+      const r = Math.random() * total;
+      let cumulative = 0;
       for (const item of results) {
-        sum += item.weight;
-        if (r < sum) return item.file;
+        cumulative += item.weight;
+        if (r < cumulative) return item.file;
       }
       return results[results.length - 1].file;
     }
 
-    cat.addEventListener('click', () => {
+    // 🐱 點擊觸發動畫與音效
+    cat.addEventListener('click', async () => {
       if (isPlaying) return;
       isPlaying = true;
 
-      // 換成動畫 GIF
       cat.src = 'cat.gif';
 
-      // 音樂立刻播放
       try {
-        sfx.currentTime = 0;
-        sfx.play();
+        await sfx.play();
       } catch (e) {
         console.warn('音效播放失敗:', e);
       }
 
-      // 等動畫播放結束（4秒）→ 顯示結果圖
       setTimeout(() => {
         cat.src = getResult();
         if (navigator.vibrate) navigator.vibrate(200);
         isPlaying = false;
-      }, 4000);
+      }, 4000); // 4秒動畫後顯示結果
     });
   </script>
 </body>
