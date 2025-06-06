@@ -33,55 +33,50 @@
   <!-- 懸疑音效檔案 -->
   <audio id="sfx" src="suspense.mp3" preload></audio>
 
-  <script>
-    const cat = document.getElementById('cat');
-    const sfx = document.getElementById('sfx');
-    sfx.load();
-    sfx.volume = 0.8;
+  <img id="cat" src="cat.gif" alt="貓咪擲筊動畫">
 
-    const frames = ['1.JPG','2.JPG','3.JPG','4.PNG','5.JPG','6.JPG','7.JPG'];
-    const results = [
-      { file: '8-3.JPG', weight: 0.5 },
-      { file: '8-1.JPG', weight: 0.25 },
-      { file: '8-2.JPG', weight: 0.25 }
-    ];
-    // 各幀停留時間 (ms)
-    // 前5張200ms，第6張400ms，第7張3000ms (3秒)
-    const durations = [200,200,200,200,200,400,3000];
+<audio id="sfx" src="suspense.mp3" preload></audio>
 
-    frames.concat(results.map(r => r.file)).forEach(src => {
-      const img = new Image(); img.src = src;
-    });
+<script>
+  const cat = document.getElementById('cat');
+  const sfx = document.getElementById('sfx');
+  sfx.volume = 0.8;
 
-    function getResult() {
-      let r = Math.random(), sum = 0;
-      for (const item of results) {
-        sum += item.weight;
-        if (r < sum) return item.file;
-      }
-      return results[results.length - 1].file;
+  const results = [
+    { file: '8-3.JPG', weight: 0.5 },
+    { file: '8-1.JPG', weight: 0.25 },
+    { file: '8-2.JPG', weight: 0.25 }
+  ];
+
+  results.forEach(r => {
+    const img = new Image(); img.src = r.file;
+  });
+
+  function getResult() {
+    let r = Math.random(), sum = 0;
+    for (const item of results) {
+      sum += item.weight;
+      if (r < sum) return item.file;
     }
+    return results[results.length - 1].file;
+  }
 
-    function playFrames(idx = 0) {
-      if (idx < frames.length) {
-        cat.src = frames[idx];
-        if (idx === 6) {
-          sfx.currentTime = 0;
-          sfx.play().catch(err => console.warn('Audio play failed:', err));
-        }
-        setTimeout(() => playFrames(idx + 1), durations[idx]);
-      } else {
-        setTimeout(() => {
-          cat.src = getResult();
-          if (navigator.vibrate) navigator.vibrate(200);
-        }, 200);
-      }
-    }
+  let isPlaying = false;
+  cat.addEventListener('click', () => {
+    if (isPlaying) return;
+    isPlaying = true;
 
-    cat.addEventListener('click', () => {
-      sfx.load();
-      playFrames(0);
-    });
-  </script>
+    cat.src = 'cat.gif';
+    sfx.currentTime = 0;
+    sfx.play().catch(err => console.warn('Audio play failed:', err));
+
+    setTimeout(() => {
+      const resultFile = getResult();
+      cat.src = resultFile;
+      if (navigator.vibrate) navigator.vibrate(200);
+      isPlaying = false;
+    }, 3000); // 假設 GIF 總長約 3 秒
+  });
+</script>
 </body>
 </html>
