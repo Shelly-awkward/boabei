@@ -29,7 +29,6 @@
 <body>
   <img id="cat" src="cat-still.jpg" alt="貓咪擲筊" />
   <audio id="sfx" src="suspense.mp3" preload="auto"></audio>
-
   <script>
     const cat = document.getElementById('cat');
     const sfx = document.getElementById('sfx');
@@ -52,28 +51,25 @@
       return results[results.length - 1].file;
     }
 
-    cat.addEventListener('click', () => {
-      if (isPlaying) return;
-      isPlaying = true;
+    cat.addEventListener('click', async () => {
+  if (isPlaying) return;
+  isPlaying = true;
 
-      // 換成動畫 GIF
-      cat.src = 'cat.gif';
+  cat.src = 'cat.gif';
 
-      // 音樂立刻播放
-      try {
-        sfx.currentTime = 0;
-        sfx.play();
-      } catch (e) {
-        console.warn('音效播放失敗:', e);
-      }
+  // 先 load 音效，再播放（避免某些瀏覽器延遲）
+  try {
+    await sfx.play();
+  } catch (e) {
+    console.warn('音效播放失敗:', e);
+  }
 
-      // 等動畫播放結束（4秒）→ 顯示結果圖
-      setTimeout(() => {
-        cat.src = getResult();
-        if (navigator.vibrate) navigator.vibrate(200);
-        isPlaying = false;
-      }, 4000);
-    });
+  setTimeout(() => {
+    cat.src = getResult();
+    if (navigator.vibrate) navigator.vibrate(200);
+    isPlaying = false;
+  }, 4000);
+});
   </script>
 </body>
 </html>
