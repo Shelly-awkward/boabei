@@ -6,60 +6,51 @@
   <title>貓咪擲筊動畫</title>
   <style>
     html, body {
-      margin: 0;
-      padding: 0;
-      width: 100vw;
-      height: 100vh;
+      margin: 0; padding: 0;
+      width: 100vw; height: 100vh;
+    }
+    body {
       background: #fff8f0;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
+      display: flex; justify-content: center; align-items: center;
       font-family: sans-serif;
     }
     #cat {
       max-width: 90vw;
-      max-height: 60vh;
+      max-height: 90vh;
+      width: auto; height: auto;
       cursor: pointer;
+      transition: transform 0.1s ease;
     }
-    #resultText {
-      font-size: 2rem;
-      margin-top: 1.5rem;
-      display: none;
-      color: #333;
+    #cat:active {
+      transform: scale(0.97);
     }
   </style>
 </head>
 <body>
-  <!-- 初始靜態圖片 -->
-  <img id="cat" src="cat-still.jpg" alt="貓咪擲筊動畫">
-  <!-- 結果文字 -->
-  <div id="resultText"></div>
-  <!-- 音效 -->
-  <audio id="sfx" src="suspense.mp3" preload="auto"></audio>
+  <!-- 動畫起始圖 -->
+  <img id="cat" src="1.JPG" alt="貓咪擲筊動畫">
+
+  <!-- 懸疑音效檔案 -->
+  <audio id="sfx" src="suspense.mp3" preload></audio>
 
   <script>
     const cat = document.getElementById('cat');
     const sfx = document.getElementById('sfx');
-    const resultText = document.getElementById('resultText');
+    sfx.load();
     sfx.volume = 0.8;
 
+    const frames = ['1.JPG','2.JPG','3.JPG','4.PNG','5.JPG','6.JPG','7.JPG'];
     const results = [
       { file: '8-3.JPG', weight: 0.5 },
       { file: '8-1.JPG', weight: 0.25 },
       { file: '8-2.JPG', weight: 0.25 }
     ];
+    // 各幀停留時間 (ms)
+    // 前5張200ms，第6張400ms，第7張3000ms (3秒)
+    const durations = [200,200,200,200,200,400,3000];
 
-    const resultTextMap = {
-      '8-3.JPG': 'あたり！',
-      '8-2.JPG': 'はずれ！',
-      '8-1.JPG': 'わからん〜'
-    };
-
-    // 預先載入結果圖片
-    results.forEach(r => {
-      const img = new Image();
-      img.src = r.file;
+    frames.concat(results.map(r => r.file)).forEach(src => {
+      const img = new Image(); img.src = src;
     });
 
     function getResult() {
@@ -71,38 +62,25 @@
       return results[results.length - 1].file;
     }
 
-    let isPlaying = false;
+    function playFrames(idx = 0) {
+      if (idx < frames.length) {
+        cat.src = frames[idx];
+        if (idx === 6) {
+          sfx.currentTime = 0;
+          sfx.play().catch(err => console.warn('Audio play failed:', err));
+        }
+        setTimeout(() => playFrames(idx + 1), durations[idx]);
+      } else {
+        setTimeout(() => {
+          cat.src = getResult();
+          if (navigator.vibrate) navigator.vibrate(200);
+        }, 200);
+      }
+    }
 
     cat.addEventListener('click', () => {
-      if (isPlaying) return;
-      isPlaying = true;
-
-      resultText.style.display = 'none';
-
-      // 改成動畫並強制重載（避免快取）
-      cat.src = 'cat.gif?t=' + Date.now();
-
-      // 延遲播放音效
-      setTimeout(() => {
-        sfx.currentTime = 0;
-        sfx.play().catch(err => console.warn('音效播放失敗:', err));
-      }, 1060);
-
-      // 動畫後顯示結果圖與文字
-      setTimeout(() => {
-        const resultFile = getResult();
-        cat.style.display = 'none';
-        setTimeout(() => {
-          cat.src = resultFile;
-          cat.style.display = 'block';
-
-          resultText.innerText = resultTextMap[resultFile] || '';
-          resultText.style.display = 'block';
-
-          if (navigator.vibrate) navigator.vibrate(200);
-          isPlaying = false;
-        }, 100); // 延遲避免動畫殘影
-      }, 4060);
+      sfx.load();
+      playFrames(0);
     });
   </script>
 </body>
