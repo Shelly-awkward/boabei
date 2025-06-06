@@ -1,55 +1,86 @@
-const cat = document.getElementById('cat');
-const sfx = document.getElementById('sfx');
-const resultText = document.getElementById('resultText');
-sfx.volume = 0.8;
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>貓咪擲筊動畫</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #fff8f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: sans-serif;
+    }
+    #cat {
+      max-width: 90vw;
+      max-height: 90vh;
+      width: auto;
+      height: auto;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <!-- 初始靜態圖片 -->
+  <img id="cat" src="cat-still.jpg" alt="貓咪擲筊動畫">
 
-const results = [
-  { file: '8-3.JPG', weight: 0.5 },
-  { file: '8-1.JPG', weight: 0.25 },
-  { file: '8-2.JPG', weight: 0.25 }
-];
+  <!-- 懸疑音效 -->
+  <audio id="sfx" src="suspense.mp3" preload></audio>
 
-const resultTextMap = {
-  '8-3.JPG': 'あたり！',
-  '8-2.JPG': 'はずれ！',
-  '8-1.JPG': 'わからん〜'
-};
+  <script>
+    const cat = document.getElementById('cat');
+    const sfx = document.getElementById('sfx');
+    sfx.volume = 0.8;
 
-results.forEach(r => {
-  const img = new Image(); img.src = r.file;
-});
+    const results = [
+      { file: '8-3.JPG', weight: 0.5 },
+      { file: '8-1.JPG', weight: 0.25 },
+      { file: '8-2.JPG', weight: 0.25 }
+    ];
 
-function getResult() {
-  let r = Math.random(), sum = 0;
-  for (const item of results) {
-    sum += item.weight;
-    if (r < sum) return item.file;
-  }
-  return results[results.length - 1].file;
-}
+    // 預先載入圖片
+    results.forEach(r => {
+      const img = new Image();
+      img.src = r.file;
+    });
 
-let isPlaying = false;
+    function getResult() {
+      let r = Math.random(), sum = 0;
+      for (const item of results) {
+        sum += item.weight;
+        if (r < sum) return item.file;
+      }
+      return results[results.length - 1].file;
+    }
 
-cat.addEventListener('click', () => {
-  if (isPlaying) return;
-  isPlaying = true;
-  resultText.style.display = 'none';
+    let isPlaying = false;
 
-  cat.src = 'cat.gif';
+    cat.addEventListener('click', () => {
+      if (isPlaying) return;
+      isPlaying = true;
 
-  setTimeout(() => {
-    sfx.currentTime = 0;
-    sfx.play().catch(err => console.warn('Audio play failed:', err));
-  }, 1060);
+      // 變成動畫 GIF
+      cat.src = 'cat.gif';
 
-  setTimeout(() => {
-    const resultFile = getResult();
-    cat.src = resultFile;
+      // 1.06 秒後播放音效
+      setTimeout(() => {
+        sfx.currentTime = 0;
+        sfx.play().catch(err => console.warn('Audio play failed:', err));
+      }, 1060);
 
-    resultText.innerText = resultTextMap[resultFile] || '';
-    resultText.style.display = 'block';
-
-    if (navigator.vibrate) navigator.vibrate(200);
-    isPlaying = false;
-  }, 4060);
-});
+      // 4.06 秒後顯示擲筊結果圖
+      setTimeout(() => {
+        const resultFile = getResult();
+        cat.src = resultFile;
+        if (navigator.vibrate) navigator.vibrate(200);
+        isPlaying = false;
+      }, 4060);
+    });
+  </script>
+</body>
+</html>
